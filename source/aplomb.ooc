@@ -161,7 +161,7 @@ Polygon: class {
 
     pos: Vector
 
-    init: func (pos: Vector, points: VectorList) {
+    init: func (points: VectorList) {
         this points = points
     }
 

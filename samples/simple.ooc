@@ -36,7 +36,7 @@ main: func {
     points data[1] = (x, 0) as Vector
     points data[2] = (x, x) as Vector
     points data[3] = (0, x) as Vector
-    poly := Polygon new((0, 0) as Vector, points)
+    poly := Polygon new(points)
     poly offset = (-0.5 * x, -0.5 * x) as Vector
     poly angle = 3.14159265f * 0.25f
 
@@ -48,7 +48,7 @@ main: func {
     points2 data[1] = (4, 0) as Vector
     points2 data[2] = (4, 4) as Vector
     points2 data[3] = (0, 4) as Vector
-    poly2 := Polygon new((0, 0) as Vector, points2)
+    poly2 := Polygon new(points2)
     poly2 offset = (-2, -2) as Vector
 
     "\nCalc points for poly2: " println()
