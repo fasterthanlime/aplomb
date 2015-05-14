@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/fasterthanlime/aplomb.svg?branch=master)](https://travis-ci.org/fasterthanlime/aplomb)
+
 ## aplomb
 
 An ooc implementation of the Separating Axis Theorem, for
