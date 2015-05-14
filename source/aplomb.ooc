@@ -130,6 +130,10 @@ Vector: cover {
     len: func -> Float {
         sqrt(x * x + y * y)
     }
+
+    toString: func -> String {
+        "(%.2f, %.2f)" format(x, y)
+    }
 }
 
 VectorList: cover {
@@ -154,6 +158,8 @@ Polygon: class {
     calcPoints: VectorList
     edges: VectorList
     normals: VectorList
+
+    pos: Vector
 
     init: func (pos: Vector, points: VectorList) {
         this points = points
@@ -229,5 +235,126 @@ Polygon: class {
         }
     }
 
+}
+
+Response: cover {
+    overlapN, overlapV: Vector
+
+    aInB, bInA: Bool
+    overlap: Float
+
+    clear: func@ {
+        aInB = true
+        bInA = true
+        overlap = INFINITY
+    }
+}
+
+FloatTuple: cover {
+    a: Float
+    b: Float
+}
+
+flattenPointsOn: func (points: VectorList, normal: Vector) -> FloatTuple {
+    min := INFINITY
+    max := -INFINITY
+    for (i in 0..points length) {
+        dot := points data[i] dot(normal)
+        if (dot < min) { min = dot }
+        if (dot > max) { max = dot }
+    }
+    (min, max) as FloatTuple
+}
+
+isSeparatingAxis: func (aPos: Vector, bPos: Vector, aPoints: VectorList,
+    bPoints: VectorList, axis: Vector, response: Response*) -> Bool {
+
+    offsetV := bPos sub(aPos)
+    projectedOffset := offsetV dot(axis)
+
+    rangeA := flattenPointsOn(aPoints, axis)
+    rangeB := flattenPointsOn(bPoints, axis)
+
+    rangeB a += projectedOffset
+    rangeB b += projectedOffset
+
+    if (rangeA a > rangeB b || rangeB a > rangeA b) {
+        return true
+    }
+
+    if (response) {
+        overlap := 0.0f
+
+        if (rangeA a < rangeB a) {
+            // A starts further left than B
+            response@ aInB = false
+
+            if (rangeA b < rangeB b) {
+                // A ends before B does. We have to pull A out of B
+                overlap = rangeA b - rangeB a
+                response@ bInA = false
+            } else {
+                // B is fully inside A. Pick the shortest way out
+                option1 := rangeA b - rangeB a
+                option2 := rangeB b - rangeA a
+                overlap = option1 < option2 ? option1 : -option2
+            }
+        } else {
+            // B starts further left than A
+            response@ bInA = false
+
+            if (rangeA b > rangeB b) {
+                // B ends before A does. We have to push A out of B
+                overlap = rangeA a - rangeB b
+                response@ aInB = false
+            } else {
+                // A is fully inside B. Pick the shortest way out.
+                option1 := rangeA b - rangeB a
+                option2 := rangeB b - rangeA a
+                overlap = option1 < option2 ? option1 : -option2
+            }
+        }
+
+        // If this is the smallest amount of overlap we've seen so far,
+        // set it as the minimum overlap
+        absOverlap := overlap > 0 ? overlap : -overlap
+        if (absOverlap < response@ overlap) {
+            response@ overlap = absOverlap
+            if (overlap < 0) {
+                response@ overlapN = axis reverse()
+            } else {
+                response@ overlapN = axis
+            }
+        }
+    }
+    return false
+}
+
+testPolygonPolygon: func (a: Polygon, b: Polygon, response: Response*) -> Bool {
+    aPoints := a calcPoints
+    aLen := aPoints length
+    bPoints := b calcPoints
+    bLen := bPoints length
+
+    for (i in 0..aLen) {
+        if (isSeparatingAxis(a pos, b pos, aPoints, bPoints, a normals data[i], response)) {
+            return false
+        }
+    }
+
+    for (i in 0..bLen) {
+        if (isSeparatingAxis(a pos, b pos, aPoints, bPoints, b normals data[i], response)) {
+            return false
+        }
+    }
+
+    // Since none of the edge normals of A or B are a separating axis, there
+    // is an intersection and we've already calculated the smallest overlap
+    // (in isSeparatingAxis). Calculate the final overlap vector.
+    if (response) {
+        ov := response@ overlap
+        response@ overlapV = response@ overlapN scale(ov, ov)
+    }
+    return true
 }
 
