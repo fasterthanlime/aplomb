@@ -5,11 +5,8 @@ convex polygon collision detection.
 
 ### Authors
 
-  * Amos Wenger <amoswenger@gmail.com>
-
-Based on SAT.js, from:
-
-  * Jim Riecken <jimr@jimr.ca>
+  * Jim Riecken <jimr@jimr.ca> (Original SAT.js code)
+  * Amos Wenger <amoswenger@gmail.com> (ooc port, performance adjustments)
   
 ### Links
 
