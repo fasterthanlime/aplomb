@@ -22,12 +22,14 @@ Aplomb: class {
             duk putPropString(overlapVIdx, "x")
             duk pushNumber(response overlapV y)
             duk putPropString(overlapVIdx, "y")
+            duk putPropString(objIdx, "overlapV")
 
             overlapNIdx := duk pushObject()
             duk pushNumber(response overlapN x)
             duk putPropString(overlapNIdx, "x")
             duk pushNumber(response overlapN y)
             duk putPropString(overlapNIdx, "y")
+            duk putPropString(objIdx, "overlapN")
 
             duk pushNumber(response overlap)
             duk putPropString(objIdx, "overlap")
